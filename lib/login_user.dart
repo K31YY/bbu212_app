@@ -1,7 +1,11 @@
 import 'package:bbu212_app/app_colors.dart';
 import 'package:bbu212_app/sing_up_user.dart';
 import 'package:bbu212_app/app_dashboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginUser extends StatefulWidget {
   const LoginUser({super.key});
@@ -21,6 +25,46 @@ class _LoginUserState extends State<LoginUser> {
     });
   }
 
+  final _keyForm = GlobalKey<FormState>();
+  TextEditingController controllerEmail = TextEditingController();
+  TextEditingController controllerPassword = TextEditingController();
+  Future<void> LoginUser(String email, String password) async {
+    try {
+      EasyLoading.show(status: 'Please wait...');
+      await Future.delayed(Duration(seconds: 1));
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      User? user = userCredential.user;
+      if (user != null) {
+        // login succesed
+        // save user login infor
+        final sp = await SharedPreferences.getInstance();
+
+        DocumentSnapshot userData = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        Map<String, dynamic> data = userData.data() as Map<String, dynamic>;
+
+        sp.setString('UID', user.uid);
+        sp.setString('FULLNAME', data['fullname']);
+        sp.setString('EMAIL', data['email']);
+
+        EasyLoading.dismiss();
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const AppDashboard()),
+          (route) => false,
+        );
+      } else {
+        EasyLoading.showError('Login Failed');
+      }
+    } catch (ex) {
+      EasyLoading.showError('Error: $ex');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,6 +81,7 @@ class _LoginUserState extends State<LoginUser> {
         ),
       ),
       body: Form(
+        key: _keyForm,
         child: ListView(
           children: <Widget>[
             Container(
@@ -50,7 +95,17 @@ class _LoginUserState extends State<LoginUser> {
             ),
             Container(
               margin: EdgeInsets.all(10),
-              child: TextField(
+              child: TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+                controller: controllerEmail,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
@@ -63,7 +118,17 @@ class _LoginUserState extends State<LoginUser> {
             ),
             Container(
               margin: EdgeInsets.all(10),
-              child: TextField(
+              child: TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters long';
+                  }
+                  return null;
+                },
+                controller: controllerPassword,
                 obscureText: ispassword,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -97,13 +162,11 @@ class _LoginUserState extends State<LoginUser> {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AppDashboard(),
-                    ),
-                    (route) => false,
-                  );
+                  if (_keyForm.currentState!.validate()) {
+                    String email = controllerEmail.text.trim();
+                    String password = controllerPassword.text.trim();
+                    LoginUser(email, password);
+                  }
                 },
                 child: Text('LOGIN', style: TextStyle(color: AppColors.white)),
               ),
