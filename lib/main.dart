@@ -1,5 +1,6 @@
+import 'package:bbu212_app/app_auth.dart';
 import 'package:bbu212_app/app_colors.dart';
-import 'package:bbu212_app/login_user.dart';
+// import 'package:bbu212_app/login_user.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'BTB212 App',
-      home: const LoginUser(), // startup screen, launcher screen
+      home: const AppAuth(), // startup screen, launcher screen
       builder: EasyLoading.init(),
       theme: ThemeData.light().copyWith(
         appBarTheme: AppBarTheme(

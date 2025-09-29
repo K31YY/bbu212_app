@@ -1,5 +1,5 @@
 import 'package:bbu212_app/app_colors.dart';
-import 'package:bbu212_app/app_dashboard.dart';
+// import 'package:bbu212_app/app_dashboard.dart';
 import 'package:bbu212_app/cards/menu/about_us.dart';
 import 'package:bbu212_app/cards/menu/change_password.dart';
 import 'package:bbu212_app/cards/menu/contact_us.dart';
@@ -9,11 +9,44 @@ import 'package:bbu212_app/cards/menu/invite_friend.dart';
 import 'package:bbu212_app/cards/menu/my_profile.dart';
 import 'package:bbu212_app/cards/menu/promotion.dart';
 import 'package:bbu212_app/cards/menu/terms_of_us.dart';
-import 'package:bbu212_app/login_user.dart';
+// import 'package:bbu212_app/login_user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NavigationMenu extends StatelessWidget {
   const NavigationMenu({super.key});
+
+  Future<void> _logout() async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.clear();
+    await FirebaseAuth.instance.signOut();
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    Navigator.pop(context);
+    final isLogout = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: Text('Confirm Logout'),
+        content: Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+
+            child: Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('Yes'),
+          ),
+        ],
+      ),
+    );
+    if (isLogout == true) {
+      _logout();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,48 +172,7 @@ class NavigationMenu extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const AppDashboard()),
-                (route) => true,
-              );
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Confirm Logout'),
-                  content: Text('Are you sure you want to logout?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AppDashboard(),
-                          ),
-                          (route) => true,
-                        );
-                      },
-                      child: Text('No'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginUser(),
-                          ),
-                          (route) => false,
-                        );
-                      },
-                      child: Text('Yes'),
-                    ),
-                  ],
-                ),
-              );
-            },
+            onTap: () => _confirmLogout(context),
           ),
         ],
       ),
