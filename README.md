@@ -1,15 +1,10 @@
-# bbu212_app
-
-A new Flutter project.
+### Store App
+This project is connected with database used Firebase.
+When you login it can get data from FireStore.
 
 ## Getting Started
-# This project is has database connected to firebase
-## When you clone my repos you must write command in terminal \
-### flutter clean 
-### flutter pub get
 
 
-This project is a starting point for a Flutter application.
 
 A few resources to get you started if this is your first Flutter project:
 
