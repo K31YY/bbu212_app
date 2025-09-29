@@ -1,9 +1,19 @@
-### Store App
+## Store App
 This project is connected with database used Firebase.
 When you login it can get data from FireStore.
 
 ## Getting Started
 
+
+- flutter clean
+- flutter pub get
+
+## Requirements
+
+- NDK Version 27.0.12077973
+- minSdk = flutter.minSdkVersion
+- versionCode = flutter.targetSdkVersion
+- versionName = flutter.versionName
 
 
 A few resources to get you started if this is your first Flutter project:
