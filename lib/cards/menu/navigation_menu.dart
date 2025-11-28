@@ -14,13 +14,34 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class NavigationMenu extends StatelessWidget {
+class NavigationMenu extends StatefulWidget {
   const NavigationMenu({super.key});
 
+  @override
+  State<NavigationMenu> createState() => _NavigationMenuState();
+}
+
+class _NavigationMenuState extends State<NavigationMenu> {
+  String? fullname;
+  String? email;
   Future<void> _logout() async {
     final sp = await SharedPreferences.getInstance();
     await sp.clear();
     await FirebaseAuth.instance.signOut();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    final sp = await SharedPreferences.getInstance();
+    setState(() {
+      fullname = sp.getString('FULLNAME');
+      email = sp.getString('EMAIL');
+    });
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
@@ -55,8 +76,8 @@ class NavigationMenu extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text('Kheourt Sokhy'),
-            accountEmail: Text('kheourtsokhy@bb.bbu.edu.kh'),
+            accountName: Text('$fullname'),
+            accountEmail: Text('$email'),
             currentAccountPicture: CircleAvatar(
               child: ClipOval(
                 child: Image.asset(

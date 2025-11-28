@@ -11,6 +11,7 @@ import 'package:bbu212_app/product_screen.dart';
 import 'package:bbu212_app/setting_screen.dart';
 // import 'package:bbu212_app/shope.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppDashboard extends StatefulWidget {
   const AppDashboard({super.key});
@@ -20,6 +21,34 @@ class AppDashboard extends StatefulWidget {
 }
 
 class _AppDashboardState extends State<AppDashboard> {
+  String? fullname;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    final sp = await SharedPreferences.getInstance();
+    setState(() {
+      fullname = sp.getString('FULLNAME');
+    });
+  }
+
+  String greetingmsg() {
+    String msg = '';
+    var now = DateTime.now().hour;
+    if (now >= 5 && now < 12) {
+      msg = 'Good Morning';
+    } else if (now >= 12 && now < 18) {
+      msg = 'Good Afternoon';
+    } else {
+      msg = 'Good Evening';
+    }
+    return msg;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,14 +140,14 @@ class _AppDashboardState extends State<AppDashboard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Good Afternoon!',
+                                greetingmsg(),
                                 style: TextStyle(
                                   color: AppColors.bgColor,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text('BTB 212'),
+                              Text('$fullname'),
                               SizedBox(height: 10),
                             ],
                           ),
@@ -220,9 +249,7 @@ class _AppDashboardState extends State<AppDashboard> {
                 // Navigate to Contacts page
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const ContactScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => ContactScreen()),
                 );
               } else if (title == 'Groups') {
                 Navigator.push(
